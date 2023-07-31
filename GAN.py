@@ -89,17 +89,17 @@ class GAN():
         # For each epoch
         for epoch in range(NUM_EPOCHS):
             # For each batch in the dataloader
-            for i, data in enumerate(dataloader, 0):
+            for i, (image, label) in enumerate(dataloader, 0):
 
                 # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
                 # Train with all-real batch
                 self.discriminator.zero_grad()
                 # Format batch
-                real_cpu = data[0].to(self.device)
-                b_size = real_cpu.size(0)
-                label = torch.full((b_size,), REAL_LABEL, dtype=torch.float, device=self.device)
+                image = image.to(self.device)
+                batch_size = image.size(0)
+                label = torch.full((batch_size,), REAL_LABEL, dtype=torch.float, device=self.device)
                 # Forward pass real batch through D
-                output = self.discriminator(real_cpu).view(-1)
+                output = self.discriminator(image).view(-1)
                 # Calculate loss on all-real batch
                 errD_real = self.criterion(output, label)
                 # Calculate gradients for D in backward pass
@@ -108,7 +108,7 @@ class GAN():
 
                 # Train with all-fake batch
                 # Generate batch of latent vectors
-                noise = torch.randn(b_size, NZ, 1, 1, device=self.device)
+                noise = torch.randn(batch_size, NZ, 1, 1, device=self.device)
                 # Generate fake image batch with G
                 fake = self.generator(noise)
                 label.fill_(FAKE_LABEL)

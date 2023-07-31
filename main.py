@@ -19,13 +19,15 @@ def main():
     # Root directory for dataset
     parser = argparse.ArgumentParser(description='Computing ')
     parser.add_argument('--path', type=str, help='path to the folder', required=True) # path to the image file
-    parser.add_argument('--name_images', type=str, help='name of the images file', required=True) # path to the image file
+    parser.add_argument('--name_images', type=str, help='name of the images folder', required=True) # path to the image file
     parser.add_argument('--name_gen', type=str, help='name of the generator weights file', default=None, required=False) # path to the image file
     parser.add_argument('--name_discr', type=str, help='name of the discriminator weights file', default=None, required=False) # path to the image file
-    parser.add_argument('--save', type=int, help='whether or not to save the weights', default=0)
+    parser.add_argument('--save', type=int, help='whether or not to save the weights', default=0, required=False)
     args = parser.parse_args()
     dataroot = args.path
-    name_images, name_gen, name_discr = args.name_images, args.name_gen, args.name_discr
+    name_images = args.name_images
+    path_gen = os.path.join(dataroot, args.name_gen) if args.name_gen else None
+    path_discr = os.path.join(dataroot, args.name_discr) if args.name_discr else None
     save = bool(args.save)
 
     DL = DataLoader(os.path.join(dataroot, name_images))
@@ -33,11 +35,11 @@ def main():
     DL.plot_sample()
 
     G = GAN()
-    G.initialize_models(os.path.join(dataroot, name_gen), os.path.join(dataroot, name_discr))
+    G.initialize_models(path_gen, path_discr)
     G.show_model()
     G.train_model(DL.dataloader)
     if save:
-        G.save_model(os.path.join(dataroot, name_gen), os.path.join(dataroot, name_discr))
+        G.save_model(path_gen, path_discr)
     G.plot_losses()
     G.plot_generator_performance()
     G.test_generator(DL.dataloader)
